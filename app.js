@@ -197,7 +197,7 @@
   function setTab(t) { document.querySelectorAll('.tab').forEach(function (a) { a.classList.toggle('on', a.dataset.tab === t); }); }
 
   function statusPill(m) {
-    return m.status === 'approved' ? '<span class="pill approved">Approved ' + esc(m.version) + '</span>' : '<span class="pill draft">Draft ' + esc(m.version) + '</span>';
+    return m.status === 'approved' ? '<span class="pill approved">' + esc(m.version) + ', approved by the author</span>' : '<span class="pill draft">Draft ' + esc(m.version) + '</span>';
   }
 
   function chapterRow(c) {
@@ -304,10 +304,11 @@
     var rec = store.get('recent', []).filter(function (x) { return x !== id; }); rec.unshift(id); store.set('recent', rec.slice(0, 8));
     store.set('last', { id: id, sec: secN || null });
     var m = ch.meta, labels = book.sectionLabels || {};
-    setBar(m.title, statusPill(m).replace(/<[^>]+>/g, '') + ' · checked ' + fmtDate(m.checked), true); setTab('home');
+    setBar(m.title, (m.status === 'approved' ? m.version + ' approved' : 'Draft ' + m.version) + ' · checked ' + fmtDate(m.checked), true); setTab('home');
     var saved = store.get('saved', []);
     var h = '<div class="ch-head"><h2>' + esc(m.title) + '</h2>';
-    if (m.status !== 'approved') h += '<div class="draft-note"><span><b>Draft for review.</b> Not yet approved for clinical use. Doses and brands are being verified.</span></div>';
+    if (m.status === 'approved') h += '<div class="draft-note ok"><span><b>' + esc(m.version) + ', approved by the author.</b> Evidence checked ' + fmtDate(m.checked) + '.</span></div>';
+    else h += '<div class="draft-note"><span><b>Draft for review.</b> Not yet approved for clinical use. Doses and brands are being verified.</span></div>';
     h += '</div><nav class="chips" id="chips">';
     ch.sections.forEach(function (s) {
       if (!/^\d+$/.test(s.n) || s.n === '0') return;
