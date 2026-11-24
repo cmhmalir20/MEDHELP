@@ -40,7 +40,7 @@
 
   /* ---------- Screens ---------- */
   function signInScreen(done) {
-    gate(true); bar('OPD MO Guide', 'Sign in to continue');
+    gate(true); bar('MEDHELP', 'Sign in to continue');
     var mode = 'in';
     function draw(msg, isErr) {
       view.innerHTML =
@@ -91,7 +91,7 @@
   }
 
   function pendingScreen(status) {
-    gate(true); bar('OPD MO Guide', 'Waiting for approval');
+    gate(true); bar('MEDHELP', 'Waiting for approval');
     var blocked = status === 'blocked';
     view.innerHTML = '<div class="auth-card"><h2>' + (blocked ? 'Access not approved' : 'Thanks for signing up') + '</h2>' +
       '<p class="auth-lead">' + (blocked ? 'Your account does not have access to this guide. Contact the editor if you think this is a mistake.'
@@ -120,7 +120,7 @@
   }
   function fetchContent() {
     return Promise.all([db.collection('book').doc('meta').get(), db.collection('chapters').get()]).then(function (r) {
-      if (!r[0].exists) return { book: { bookTitle: 'OPD MO Guide', bookSubtitle: 'Adult medical OPD, Pakistan', sectionLabels: {}, groups: [], chapters: [] }, md: {} };
+      if (!r[0].exists) return { book: { bookTitle: 'MEDHELP', bookSubtitle: 'OPD guide for medical officers', sectionLabels: {}, groups: [], chapters: [] }, md: {} };
       var book = JSON.parse(r[0].data().json), md = {};
       r[1].forEach(function (d) { md[d.id] = d.data().md; });
       return { book: book, md: md };

@@ -1,10 +1,32 @@
 {
-  "name": "OPD MO Guide",
-  "short_name": "OPD Guide",
-  "description": "Adult medical OPD guide for medical officers in Pakistan",
+  "name": "MEDHELP",
+  "short_name": "MEDHELP",
+  "description": "OPD guide for medical officers in Pakistan",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f3f6f6",
   "theme_color": "#0b5f66",
-  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
 }

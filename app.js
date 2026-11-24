@@ -20,6 +20,27 @@
   var ICON_STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4z"/></svg>';
   var ICON_STAR_ON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4z"/></svg>';
 
+
+  var GROUP_ICON = {
+    endocrine: '<path d="M12 3c3 4 6 7.2 6 11a6 6 0 0 1-12 0c0-3.8 3-7 6-11z"/><path d="M9.5 14.5a2.5 2.5 0 0 0 2.5 2.5"/>',
+    cardio: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M5 12h3l1.5-2.5 2 5 1.5-2.5H19"/>',
+    resp: '<path d="M12 4v8"/><path d="M12 10c-1.5 0-2.5-1-4-1-2 0-3 3-3 7 0 2.5 1 4 3 4 2.5 0 4-2 4-5z"/><path d="M12 10c1.5 0 2.5-1 4-1 2 0 3 3 3 7 0 2.5-1 4-3 4-2.5 0-4-2-4-5z"/>',
+    renal: '<path d="M8 4c-2.8 0-4 3-4 7s1.5 9 4.5 9S12 17 12 15s-2-3-2-5 2-2.5 2-4-1.5-2-4-2z"/><path d="M16 4c2.8 0 4 3 4 7s-1.5 9-4.5 9"/>',
+    gi: '<path d="M10 3v4c0 2-3 2.5-3 6a6 6 0 0 0 6 6h1a4 4 0 0 0 0-8h-1c-1.5 0-2-1-2-2V3"/>',
+    blood: '<path d="M12 3c3 4 6 7.2 6 11a6 6 0 0 1-12 0c0-3.8 3-7 6-11z"/><path d="M12 11v6M9 14h6"/>',
+    msk: '<path d="M7 4.5a2 2 0 1 1-2.5 2.5L17 19.5a2 2 0 1 1 2.5-2.5z"/>',
+    neuro: '<path d="M12 5a3 3 0 0 0-5.5 1.5A3 3 0 0 0 4 11a3 3 0 0 0 1.5 4.5A3 3 0 0 0 9 19.5a3 3 0 0 0 3-1.5"/><path d="M12 5a3 3 0 0 1 5.5 1.5A3 3 0 0 1 20 11a3 3 0 0 1-1.5 4.5 3 3 0 0 1-3.5 4 3 3 0 0 1-3-1.5V5z"/>',
+    mental: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 14.5c1 1.3 2.2 2 3.5 2s2.5-.7 3.5-2"/><path d="M9 9.5h.01M15 9.5h.01"/>'
+  };
+  function gIcon(id) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (GROUP_ICON[id] || GROUP_ICON.mental) + '</svg>'; }
+  var TOOL_ICON = {
+    flags: '<path d="M12 3l9.5 16.5h-19z"/><path d="M12 10v4M12 17h.01"/>',
+    drugs: '<rect x="3.5" y="9" width="17" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.2 8.6l5.6 8"/>',
+    chapters: '<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10a2 2 0 0 1 2 2v14a1.5 1.5 0 0 0-1.5-1.5h-5A1.5 1.5 0 0 1 4 17V5.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H14a2 2 0 0 0-2 2v14a1.5 1.5 0 0 1 1.5-1.5h5A1.5 1.5 0 0 0 20 17V5.5z"/>',
+    saved: '<path d="M6 4h12v16l-6-4-6 4z"/>'
+  };
+  function tIcon(k) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + TOOL_ICON[k] + '</svg>'; }
+
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40); }
   function fmtDate(iso) {
@@ -108,6 +129,7 @@
       delete s.nodes;
     });
     chapters[meta.id] = { meta: meta, sections: sections };
+    collectTools(meta, sections);
 
     sections.forEach(function (s) {
       s.subs.forEach(function (c) {
@@ -115,6 +137,38 @@
         if (!text && !c.id) return;
         index.push({ ch: meta.id, sec: s.n, secTitle: s.title, id: c.id, title: c.title, text: text, low: (c.title + ' ' + text).toLowerCase(), lowTitle: c.title.toLowerCase() });
       });
+    });
+  }
+
+
+  /* ---------- Cross-chapter tools: drug dose index and red flags ---------- */
+  var drugs = [];   // { name, low, ch }
+  var flags = [];   // { ch, finding, action }
+  var FLAG_RE = /emergency|immediately|transfer|same[- ]day|urgent|refer now|admit|sepsis|anaphylaxis|call 1122|\bED\b/i;
+  function cellText(td) { return td ? td.textContent.replace(/\s+/g, ' ').trim() : ''; }
+  function collectTools(meta, sections) {
+    drugs = drugs.filter(function (d) { return d.ch !== meta.id; });
+    flags = flags.filter(function (f) { return f.ch !== meta.id; });
+    sections.forEach(function (s) {
+      var box = document.createElement('div'); box.innerHTML = s.html;
+      if (s.n === '4') {
+        box.querySelectorAll('table tbody tr').forEach(function (tr) {
+          var td = tr.querySelector('td'); if (!td) return;
+          var st = td.querySelector('strong'), raw = st ? st.textContent : cellText(td);
+          var name = raw.split(/\s\(|\s+\d|:|,|;/)[0].replace(/\*/g, '').trim();
+          if (name.length < 3 || name.length > 40 || /^(none|other|any|all|step|patient|if|when)\b/i.test(name)) return;
+          drugs.push({ name: name, low: name.toLowerCase(), ch: meta.id });
+        });
+      }
+      if (s.n === '1') {
+        box.querySelectorAll('table tbody tr').forEach(function (tr) {
+          var tds = tr.querySelectorAll('td'); if (tds.length < 2) return;
+          var act = cellText(tds[tds.length - 1]); if (!FLAG_RE.test(act)) return;
+          var st = tds[tds.length - 1].querySelector('strong');
+          var fd = cellText(tds[0]); if (/^any .*(above|listed)/i.test(fd)) fd = 'Any emergency feature in this chapter’s triage list';
+          flags.push({ ch: meta.id, finding: fd, action: (st ? st.textContent : act).replace(/[.:]\s*$/, '') });
+        });
+      }
     });
   }
 
@@ -128,7 +182,7 @@
         })).then(function () { return { book: b, md: md }; });
       });
     return src.then(function (res) {
-      book = res.book; chapters = {}; index = [];
+      book = res.book; chapters = {}; index = []; drugs = []; flags = [];
       document.getElementById('aboutText').textContent = (window.OPDAuth ? '' : 'Prototype build. ') + book.chapters.length + ' chapters. Drafts are under review and are not yet approved for clinical use.';
       book.chapters.forEach(function (c) { if (res.md[c.id] != null) buildChapter(c, res.md[c.id]); });
       book.chapters = book.chapters.filter(function (c) { return chapters[c.id]; });
@@ -146,29 +200,109 @@
     return m.status === 'approved' ? '<span class="pill approved">Approved ' + esc(m.version) + '</span>' : '<span class="pill draft">Draft ' + esc(m.version) + '</span>';
   }
 
+  function chapterRow(c) {
+    return '<a class="ch-row" href="#' + c.id + '"><span class="ch-code">' + esc(c.short) + '</span><span class="ch-meta"><span class="ch-title">' + esc(c.title) +
+      '</span><span class="ch-sub">' + statusPill(c) + ' Checked ' + fmtDate(c.checked) + '</span></span>' + ICON_CHEV + '</a>';
+  }
+  function searchField(id, ph) {
+    return '<div class="searchbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>' +
+      '<input id="' + id + '" type="search" placeholder="' + ph + '" autocomplete="off" enterkeyhint="search"></div>';
+  }
+
   function renderHome() {
-    setBar(book.bookTitle, book.bookSubtitle, false); setTab('home');
-    var h = '<div class="searchbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>' +
-      '<input id="homeSearch" type="search" placeholder="Search drugs, doses, red flags…" autocomplete="off"></div>';
+    setBar('MEDHELP', 'OPD guide for medical officers', false); setTab('home');
+    document.body.classList.add('is-home');
+    var saved = store.get('saved', []).length, last = store.get('last', null), recent = store.get('recent', []).filter(function (id) { return chapters[id]; });
+    var drugN = {}; drugs.forEach(function (d) { drugN[d.low] = 1; });
+    var h = '<section class="hero"><h2>What do you need?</h2>' + searchField('homeSearch', 'Search a drug, dose, symptom…') + '</section>';
+    h += '<div class="tools">' +
+      '<a class="tool t-flag" href="#redflags">' + tIcon('flags') + '<b>Red flags</b><span>' + flags.length + ' danger signs</span></a>' +
+      '<a class="tool" href="#drugs">' + tIcon('drugs') + '<b>Drug doses</b><span>A–Z · ' + Object.keys(drugN).length + ' medicines</span></a>' +
+      '<a class="tool" href="#chapters">' + tIcon('chapters') + '<b>All chapters</b><span>' + book.chapters.length + ' conditions</span></a>' +
+      '<a class="tool" href="#saved">' + tIcon('saved') + '<b>Saved</b><span>' + (saved ? saved + ' section' + (saved > 1 ? 's' : '') : 'Bookmark sections') + '</span></a></div>';
+    if (last && chapters[last.id]) {
+      var lc = chapters[last.id], ls = lc.sections.filter(function (x) { return x.n === last.sec; })[0];
+      h += '<a class="resume" href="#' + last.id + (last.sec ? '-s' + last.sec : '') + '"><span class="resume-k">Continue reading</span><span class="resume-t">' + esc(lc.meta.title) + '</span>' +
+        (ls ? '<span class="resume-s">' + esc(ls.title) + '</span>' : '') + ICON_CHEV + '</a>';
+    }
+    if (recent.length > 1) {
+      h += '<div class="eyebrow">Recently opened</div><div class="recent">' + recent.slice(0, 6).map(function (id) {
+        return '<a class="chip" href="#' + id + '">' + esc(chapters[id].meta.title) + '</a>'; }).join('') + '</div>';
+    }
+    h += '<div class="eyebrow">Body systems</div><div class="systems">';
     book.groups.forEach(function (g) {
-      var list = book.chapters.filter(function (c) { return c.group === g.id; });
-      if (!list.length) return;
-      h += '<div class="eyebrow">' + esc(g.title) + '</div><div class="ch-list">';
-      list.forEach(function (c) {
-        h += '<a class="ch-row" href="#' + c.id + '"><span class="ch-code">' + esc(c.short) + '</span><span class="ch-meta"><span class="ch-title">' + esc(c.title) +
-          '</span><br><span class="ch-sub">' + statusPill(c) + ' &nbsp;Evidence checked ' + fmtDate(c.checked) + '</span></span>' + ICON_CHEV + '</a>';
-      });
-      h += '</div>';
+      var n = book.chapters.filter(function (c) { return c.group === g.id; }).length; if (!n) return;
+      h += '<a class="sys sys-' + esc(g.id) + '" href="#chapters:' + esc(g.id) + '">' + gIcon(g.id) + '<b>' + esc(g.title) + '</b><span>' + n + ' chapter' + (n > 1 ? 's' : '') + '</span></a>';
     });
-    h += '<p class="coming">More chapters are added as each one is written and reviewed.</p>';
+    h += '</div><p class="coming">All chapters are drafts under review and not yet approved for clinical use. New chapters appear here as they are written.</p>';
     view.innerHTML = h;
     var inp = document.getElementById('homeSearch');
     inp.addEventListener('keydown', function (e) { if (e.key === 'Enter' && inp.value.trim()) { lastQuery = inp.value.trim(); location.hash = 'search'; } });
-    inp.addEventListener('focus', function () { if (window.matchMedia('(max-width: 700px)').matches) { lastQuery = inp.value; location.hash = 'search'; } });
+    inp.addEventListener('focus', function () { lastQuery = inp.value; location.hash = 'search'; });
+    window.scrollTo(0, 0);
+  }
+
+  function renderChapters(groupId) {
+    setBar('Chapters', book.chapters.length + ' conditions', false); setTab('chapters');
+    var g0 = groupId && book.groups.some(function (g) { return g.id === groupId; }) ? groupId : 'all';
+    var h = '<nav class="chips filt" id="filt"><button class="chip' + (g0 === 'all' ? ' on' : '') + '" data-g="all">All</button>' +
+      book.groups.filter(function (g) { return book.chapters.some(function (c) { return c.group === g.id; }); }).map(function (g) {
+        return '<button class="chip' + (g0 === g.id ? ' on' : '') + '" data-g="' + esc(g.id) + '">' + esc(g.title) + '</button>'; }).join('') + '</nav><div id="chList"></div>';
+    view.innerHTML = h;
+    function draw(gid) {
+      var out = '';
+      book.groups.forEach(function (g) {
+        if (gid !== 'all' && g.id !== gid) return;
+        var list = book.chapters.filter(function (c) { return c.group === g.id; }).sort(function (a, b) { return a.title.localeCompare(b.title); });
+        if (!list.length) return;
+        out += '<div class="eyebrow eb-icon">' + gIcon(g.id) + esc(g.title) + '</div><div class="ch-list">' + list.map(chapterRow).join('') + '</div>';
+      });
+      document.getElementById('chList').innerHTML = out;
+    }
+    draw(g0);
+    document.getElementById('filt').addEventListener('click', function (e) {
+      var b = e.target.closest('.chip'); if (!b) return;
+      document.querySelectorAll('#filt .chip').forEach(function (c) { c.classList.toggle('on', c === b); });
+      history.replaceState(null, '', '#chapters' + (b.dataset.g === 'all' ? '' : ':' + b.dataset.g)); draw(b.dataset.g);
+    });
+    window.scrollTo(0, 0);
+  }
+
+  function renderDrugs() {
+    setBar('Drug doses A–Z', 'From each chapter’s dose table', true); setTab('home');
+    var by = {};
+    drugs.forEach(function (d) { (by[d.low] = by[d.low] || { name: d.name, chs: [] }); if (by[d.low].chs.indexOf(d.ch) < 0) by[d.low].chs.push(d.ch); });
+    var keys = Object.keys(by).sort();
+    view.innerHTML = searchField('dq', 'Filter medicines…') + '<p class="tool-note">Tap a medicine to open the dose table in that chapter.</p><div id="dl"></div>';
+    function draw(q) {
+      q = (q || '').toLowerCase().trim(); var cur = '', out = '';
+      keys.filter(function (k) { return !q || k.indexOf(q) >= 0; }).forEach(function (k) {
+        var L = k.charAt(0).toUpperCase(); if (!/[A-Z]/.test(L)) L = '#';
+        if (L !== cur) { if (cur) out += '</div>'; out += '<div class="az">' + L + '</div><div class="ch-list">'; cur = L; }
+        out += '<div class="drug"><span class="drug-n">' + esc(by[k].name) + '</span><span class="drug-c">' + by[k].chs.map(function (id) {
+          return '<a class="chip" href="#' + id + '-s4">' + esc(chapters[id].meta.short) + '</a>'; }).join('') + '</span></div>';
+      });
+      document.getElementById('dl').innerHTML = cur ? out + '</div>' : '<p class="empty">No medicine matches “' + esc(q) + '”.</p>';
+    }
+    var inp = document.getElementById('dq'); inp.addEventListener('input', function () { draw(inp.value); }); draw('');
+    window.scrollTo(0, 0);
+  }
+
+  function renderFlags() {
+    setBar('Red flags', 'Danger signs from every chapter', true); setTab('home');
+    var h = '<p class="tool-note flag-note">Findings that need emergency care, same-day referral or transfer. Tap a condition for its full triage section.</p>';
+    book.chapters.forEach(function (c) {
+      var list = flags.filter(function (f) { return f.ch === c.id; }); if (!list.length) return;
+      h += '<section class="rf"><a class="rf-h" href="#' + c.id + '-s1"><span class="ch-code">' + esc(c.short) + '</span><b>' + esc(c.title) + '</b>' + ICON_CHEV + '</a><ul>' +
+        list.map(function (f) { return '<li><span class="rf-f">' + esc(f.finding) + '</span><span class="rf-a">' + esc(f.action) + '</span></li>'; }).join('') + '</ul></section>';
+    });
+    view.innerHTML = h; window.scrollTo(0, 0);
   }
 
   function renderChapter(id, secN, anchor, terms) {
     var ch = chapters[id]; if (!ch) return renderHome();
+    var rec = store.get('recent', []).filter(function (x) { return x !== id; }); rec.unshift(id); store.set('recent', rec.slice(0, 8));
+    store.set('last', { id: id, sec: secN || null });
     var m = ch.meta, labels = book.sectionLabels || {};
     setBar(m.title, statusPill(m).replace(/<[^>]+>/g, '') + ' · checked ' + fmtDate(m.checked), true); setTab('home');
     var saved = store.get('saved', []);
@@ -187,6 +321,9 @@
         '<span class="sec-t">' + esc(s.title) + '</span><button class="star' + (on ? ' on' : '') + '" data-key="' + key + '" aria-label="' + (on ? 'Remove from saved' : 'Save section') + '">' + (on ? ICON_STAR_ON : ICON_STAR) + '</button>' + ICON_TW + '</summary>' +
         '<div class="sec-body prose">' + s.html + '</div></details>';
     });
+    var order = book.chapters, at = order.map(function (c) { return c.id; }).indexOf(id), prev = order[at - 1], next = order[at + 1];
+    h += '<nav class="pn">' + (prev ? '<a href="#' + prev.id + '"><span>Previous</span>' + esc(prev.title) + '</a>' : '<span></span>') +
+      (next ? '<a class="nx" href="#' + next.id + '"><span>Next</span>' + esc(next.title) + '</a>' : '<span></span>') + '</nav>';
     if (m.sourceDoc) h += '<p class="src-link">Master copy of this chapter: <a href="' + esc(m.sourceDoc) + '" target="_blank" rel="noopener">chapter document</a></p>';
     view.innerHTML = h;
 
@@ -209,7 +346,7 @@
       var io = new IntersectionObserver(function (ents) {
         ents.forEach(function (en) {
           if (!en.isIntersecting) return;
-          var n = en.target.id.split('-s').pop();
+          var n = en.target.id.split('-s').pop(); store.set('last', { id: id, sec: n });
           chips.forEach(function (c) { var on = c.dataset.sec === n; c.classList.toggle('on', on); if (on) c.scrollIntoView({ block: 'nearest', inline: 'center' }); });
         });
       }, { rootMargin: '-130px 0px -60% 0px' });
@@ -307,7 +444,11 @@
     var h = location.hash.replace(/^#/, '');
     sheet.hidden = true;
     if (!book || document.body.classList.contains('gated')) return;
+    document.body.classList.remove('is-home');
     if (!h) return renderHome();
+    if (h === 'chapters' || h.indexOf('chapters:') === 0) return renderChapters(h.split(':')[1]);
+    if (h === 'drugs') return renderDrugs();
+    if (h === 'redflags') return renderFlags();
     if (h === 'search') return renderSearch();
     if (h === 'saved') return renderSaved();
     if (h === 'admin' && window.OPDAuth && window.OPDAuth.isAdmin()) { setBar('Admin', 'Approve doctors and update chapters', true); setTab('admin'); return window.OPDAuth.renderAdmin(view); }

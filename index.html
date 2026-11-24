@@ -1,21 +1,24 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>OPD MO Guide</title><meta name="theme-color" content="#0b5f66"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="stylesheet" href="secure/auth.css"></head><body><title>OPD MO Guide</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>MEDHELP</title><meta name="theme-color" content="#0b5f66"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="stylesheet" href="secure/auth.css"></head><body><title>MEDHELP</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#0b5f66">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
 /* Layout: pocket-handbook app. Sticky top bar, one reading column (max 46rem), bottom tab bar on phones. */
 :root {
-  --bg: #f3f6f6;
+  --bg: #eef3f3;
   --surface: #ffffff;
-  --sunk: #e8eeef;
-  --ink: #142429;
-  --muted: #56686e;
-  --line: #d3dddf;
-  --accent: #0b5f66;
-  --accent-soft: #dcecec;
+  --sunk: #e6eeee;
+  --ink: #10252a;
+  --muted: #546a70;
+  --line: #d6e1e2;
+  --accent: #0a6168;
+  --accent-2: #0e7c84;
+  --accent-soft: #d9efee;
+  --shadow: 0 1px 2px rgba(16,37,42,.06), 0 4px 14px rgba(16,37,42,.06);
   --flag: #b3261e;
   --flag-soft: #fbe9e7;
   --draft: #8a5300;
@@ -32,13 +35,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0d1517; --surface: #142024; --sunk: #1b2a2f; --ink: #e2ebec; --muted: #94a7ac; --line: #2a3b40;
-    --accent: #5cc3c8; --accent-soft: #1b3a3d; --flag: #ff8a7a; --flag-soft: #3a1d1a;
+    --accent: #5cc3c8; --accent-2: #3aa7ad; --accent-soft: #1b3a3d; --shadow: 0 1px 2px rgba(0,0,0,.3); --flag: #ff8a7a; --flag-soft: #3a1d1a;
     --draft: #f0b65a; --draft-soft: #3a2c14; --mark: #6b5a12; --on-accent: #0d1517; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0d1517; --surface: #142024; --sunk: #1b2a2f; --ink: #e2ebec; --muted: #94a7ac; --line: #2a3b40;
-  --accent: #5cc3c8; --accent-soft: #1b3a3d; --flag: #ff8a7a; --flag-soft: #3a1d1a;
+  --accent: #5cc3c8; --accent-2: #3aa7ad; --accent-soft: #1b3a3d; --shadow: 0 1px 2px rgba(0,0,0,.3); --flag: #ff8a7a; --flag-soft: #3a1d1a;
   --draft: #f0b65a; --draft-soft: #3a2c14; --mark: #6b5a12; --on-accent: #0d1517; color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -168,7 +171,7 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface); border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
 }
-.tabs-in { max-width: 46rem; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
+.tabs-in { max-width: 46rem; margin: 0 auto; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; }
 .tab { display: grid; justify-items: center; gap: 2px; padding: 8px 0 10px; text-decoration: none; color: var(--muted); font-size: .74rem; font-weight: 500; }
 .tab svg { width: 22px; height: 22px; }
 .tab.on { color: var(--accent); }
@@ -188,6 +191,66 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
 .seg button.on { background: var(--accent); color: var(--on-accent); }
 .about { font-size: .84rem; color: var(--muted); margin-top: 10px; }
 .loading { color: var(--muted); padding: 40px 0; text-align: center; }
+
+/* ---------- v2: dashboard, tools, refreshed surfaces ---------- */
+.ch-list, .sec, .res { box-shadow: var(--shadow); }
+.ch-list { border-radius: 16px; }
+.ch-sub { display: block; margin-top: 2px; }
+.tab { position: relative; }
+.tab.on::before { content: ""; position: absolute; top: 0; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--accent); }
+body.is-home .topbar { box-shadow: none; }
+.hero { margin: -16px calc(-1 * var(--gutter-r)) 0 calc(-1 * var(--gutter-l)); padding: 18px var(--gutter-r) 22px var(--gutter-l);
+  background: linear-gradient(165deg, var(--accent) 0%, var(--accent-2) 100%); color: #fff; border-radius: 0 0 22px 22px; }
+@media (min-width: 46rem) { .hero { margin-left: 0; margin-right: 0; border-radius: 0 0 22px 22px; } }
+.hero-k { margin: 0; font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+.hero h2 { font-family: var(--f-head); font-size: 1.6rem; margin: 2px 0 14px; line-height: 1.2; }
+.hero .searchbox input { border: 0; box-shadow: 0 6px 18px rgba(0,0,0,.18); padding-block: 14px; }
+.tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.tool { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 14px 12px; text-decoration: none; color: inherit; box-shadow: var(--shadow); min-width: 0; }
+.tool svg { grid-row: span 2; width: 38px; height: 38px; padding: 8px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); }
+.tool b { font-family: var(--f-head); font-weight: 600; font-size: 1rem; line-height: 1.2; min-width: 0; }
+.tool span { color: var(--muted); font-size: .78rem; min-width: 0; }
+.tool.t-flag svg { background: var(--flag-soft); color: var(--flag); }
+.tool:active, .sys:active, .ch-row:active { transform: scale(.985); }
+.resume { display: grid; grid-template-columns: 1fr auto; align-items: center; margin-top: 12px; padding: 14px 16px; border-radius: 16px; text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); box-shadow: var(--shadow); }
+.resume .chev { grid-row: 1 / span 3; grid-column: 2; }
+.resume-k { font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.resume-t { font-family: var(--f-head); font-weight: 600; font-size: 1.1rem; }
+.resume-s { color: var(--muted); font-size: .85rem; }
+.recent { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.recent .chip { text-decoration: none; color: var(--ink); }
+.systems { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.sys { display: grid; gap: 2px; padding: 14px; border-radius: 16px; text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); min-width: 0; }
+.sys svg { width: 30px; height: 30px; color: var(--accent); margin-bottom: 6px; }
+.sys b { font-family: var(--f-head); font-weight: 600; font-size: 1rem; line-height: 1.2; }
+.sys span { color: var(--muted); font-size: .8rem; }
+.sys-cardio svg, .sys-blood svg { color: #c0392b; } .sys-resp svg { color: #2f7fb5; } .sys-gi svg { color: #a2670e; } .sys-neuro svg, .sys-mental svg { color: #7a4fb0; } .sys-msk svg { color: #5b6b2e; } .sys-renal svg { color: #8e4a63; }
+:root[data-theme="dark"] .sys svg { filter: brightness(1.5); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sys svg { filter: brightness(1.5); } }
+.filt { top: calc(env(safe-area-inset-top, 0px) + 54px); }
+.eb-icon { display: flex; align-items: center; gap: 8px; }
+.eb-icon svg { width: 18px; height: 18px; color: var(--accent); }
+.tool-note { color: var(--muted); font-size: .88rem; margin: 10px 0 4px; }
+.flag-note { background: var(--flag-soft); color: var(--ink); padding: 10px 12px; border-radius: 12px; margin-top: 0; }
+.az { font-family: var(--f-head); font-weight: 700; color: var(--accent); margin: 18px 0 6px; font-size: 1.05rem; }
+.drug { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 14px; background: var(--surface); flex-wrap: wrap; }
+.drug-n { font-weight: 500; min-width: 0; }
+.drug-c { display: flex; gap: 6px; flex-wrap: wrap; }
+.drug-c .chip { text-decoration: none; color: var(--accent); font-family: var(--f-mono); font-size: .76rem; padding: 4px 10px; }
+.rf { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--flag); border-radius: 14px; margin: 10px 0; box-shadow: var(--shadow); overflow: hidden; }
+.rf-h { display: flex; align-items: center; gap: 12px; padding: 12px 14px; text-decoration: none; color: inherit; border-bottom: 1px solid var(--line); }
+.rf-h b { flex: 1; font-family: var(--f-head); font-weight: 600; min-width: 0; }
+.rf ul { list-style: none; margin: 0; padding: 0; }
+.rf li { display: grid; gap: 2px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: .9rem; }
+.rf li:first-child { border-top: 0; }
+.rf-a { color: var(--flag); font-weight: 600; font-size: .84rem; }
+.pn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0 6px; }
+.pn a { display: grid; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); text-decoration: none; color: var(--ink); font-family: var(--f-head); font-weight: 600; box-shadow: var(--shadow); min-width: 0; }
+.pn a span { font-family: var(--f-body); font-weight: 500; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.pn a.nx { text-align: right; }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
 </style>
 
@@ -196,7 +259,7 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
     <button class="icon-btn" id="backBtn" aria-label="Back" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
-    <h1 id="barTitle">OPD MO Guide<span class="sub">Adult medical OPD, Pakistan</span></h1>
+    <h1 id="barTitle">MEDHELP<span class="sub">OPD guide for medical officers</span></h1>
     <button class="icon-btn" id="setBtn" aria-label="Reading settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
     </button>
@@ -208,7 +271,10 @@ mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 1
 <nav class="tabs" aria-label="Main">
   <div class="tabs-in">
     <a class="tab" href="#" data-tab="home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10a2 2 0 0 1 2 2v14a1.5 1.5 0 0 0-1.5-1.5h-5A1.5 1.5 0 0 1 4 17V5.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H14a2 2 0 0 0-2 2v14a1.5 1.5 0 0 1 1.5-1.5h5A1.5 1.5 0 0 0 20 17V5.5z"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6h-6v6H5.5A1.5 1.5 0 0 1 4 19.5z"/></svg>
+      Home</a>
+    <a class="tab" href="#chapters" data-tab="chapters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>
       Chapters</a>
     <a class="tab" href="#search" data-tab="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
