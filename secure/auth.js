@@ -18,7 +18,7 @@
 
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function bar(title, sub) {
-    document.getElementById('barTitle').innerHTML = esc(title) + (sub ? '<span class="sub">' + esc(sub) + '</span>' : '');
+    document.getElementById('barTitle').innerHTML = (title === 'MEDHELP' ? '<span class="brand"><b>MED</b><i>HELP</i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/></svg></span>' : esc(title)) + (sub ? '<span class="sub">' + esc(sub) + '</span>' : '');
     document.getElementById('backBtn').hidden = true;
   }
   function gate(on) { document.body.classList.toggle('gated', on); if (tabs) tabs.hidden = on; }

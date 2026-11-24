@@ -1,5 +1,5 @@
 /* Offline cache for the installed web app. Bump VERSION whenever content or code changes. */
-var VERSION = 'opd-2026-11-24-11';
+var VERSION = 'opd-2026-11-24-12';
 var FILES = ['./', 'index.html', 'vendor/firebase/firebase-app-compat.js', 'vendor/firebase/firebase-auth-compat.js', 'vendor/firebase/firebase-firestore-compat.js', 'secure/auth.js', 'secure/auth.css', 'secure/config.js', 'app.js', 'vendor/marked.umd.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png',
   ];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(FILES); })); self.skipWaiting(); });
